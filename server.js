@@ -1,6 +1,6 @@
 const express = require('express')
 const mongoose = require('mongoose')
-const colors = require('colors')
+require('colors')
 const PORT = process.env.PORT | 3002
 require('dotenv').config()
 
