@@ -1,0 +1,19 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "manages the goin in and going out of books in a library",
+  "main": "server.js",
+  "scripts": {
+   "start":"nodemon server.js"
+  },
+  "keywords": [
+  ],
+  "author": "watacle",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^4.0.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.9.2"
+  }
+}
