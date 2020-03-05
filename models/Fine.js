@@ -4,3 +4,6 @@ const FineSchema =new Schema({
     member: {type: Schema.Types.ObjectId, ref: 'User'},
     amount: {type: Number, default: 0}
 })
+
+
+module.exports = model('Fine',FineSchema);
