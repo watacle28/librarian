@@ -4,6 +4,7 @@ const UserSchema = new Schema({
     name: String,
     email: String,
     password: String,
+    profilePic: String,
     role: {
         type: String,
         enum: ['Member','Librarian','Partner'],
@@ -11,7 +12,7 @@ const UserSchema = new Schema({
     },
     booksOwned: [{type: Schema.Types.ObjectId,ref: 'Book'}],
     borrowed: [{type: Schema.Types.ObjectId, ref: 'Book'}],
-    owing: {type: Number, default: 0}
+
 
 },{timestamps: true})
 

@@ -12,7 +12,9 @@ const BookSchema = new Schema({
     author: String,
     coverImg: String,
     number0fPages: Number,
-    isAvailable: {type: Boolean, default: true},
+    copies:[{type: Schema.Types.ObjectId, ref: 'BookCopy'}],
+    availableCopies: Number,
+    loanCount : Number, 
     owner: {type: Schema.Types.ObjectId,
             ref: 'User'},
     reviews:[reviewSchema]
