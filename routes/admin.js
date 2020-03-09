@@ -77,7 +77,8 @@ router.post('/copies/:bookId',async(req,res)=>{
     const newCopies = await BookCopy.insertMany(
         copies
     )
-   book.totalCopies = copies.length 
+   book.totalCopies =+ copies.length 
+   book.availableCopies =+ copies.length
     await book.save()
 
     res.status(200).json({success: true,  newCopies})
@@ -88,31 +89,46 @@ router.post('/copies/:bookId',async(req,res)=>{
 router.post('/checkout',async(req,res)=>{
   
   //get user and book in question
-   const {ISBN} = req.body;
-   const _id = req.user.useId
-   const user = await User.findById({_id});
+   const {ISBN, email} = req.body;
+   
+   const user = await User.findOne({email}).populate('borrowed',['Book'])
    const copy = await BookCopy.findOne({ISBN})
    const book = await Book.findById({_id: copy.Book})
    const reservations = book.reservations;
-   const userReserve = reservations.indexOf(_id)
+   const userReserve = reservations.indexOf(user._id)
    const books_borrowed = user.borrowed
 
  //check if copy of book is available
    if (book.availableCopies < 1){
-       if(reservations.length < 1){
-           return res.json({error: 'no copies left'})
+       if(reservations.length < 1){ 
+     
+ 
+           return res.json({error: 'no copies left ,where the fuck did you get that',books_borrowed})
        }else{
           
            if(userReserve <= -1){
                return res.json({error: 'book has been reserved'})
            }
        }
-
    }
+   
+    // TO-DO:check if has book already
+    const has_book_already = books_borrowed.filter(item =>JSON.stringify(item.Book) === JSON.stringify(book._id) )
+   
+    if(has_book_already.length >= 1){
+        return res.json({error: 'you cant borrow the same book pliz'})
+    }
+
 // check if user has outstanding arrears
-    const userFines = await Fine.find({member:_id})
-    if(userFines.length > 1){
+    const userFines = await Fine.findOne({member:user._id})
+    if(userFines && userFines.length > 1){
         return res.json({error: 'you have fines outstanding',userFines})
+    }
+
+    //check if limit reached
+    if(books_borrowed.length >= MAX_NUMBER_OF_BOOKs){
+        return res.json({error: 'you have borrowed enough books, return some first'})
+
     }
 
     //process checkout
@@ -129,29 +145,23 @@ router.post('/checkout',async(req,res)=>{
    
    //update copy
    const IssueDate = new Date();
-   let Day = new Date().setDate(IssueDate.getDate() + 10)
-   const ReturnDate = new Date(Day);
+  
+   const ReturnDate = new Date(new Date().setDate(new Date().getDate() + LOAN_DAYS))
 
    copy.ReturnDate = ReturnDate;
-   copy.IssueDate  = ReturnDate;
+   copy.IssueDate  = IssueDate;
    copy.Availability = false;
    await copy.save();
 
   
+ return res.json({success: true,user})
  
-    if(books_borrowed.length >= MAX_NUMBER_OF_BOOKs){
-        return res.json({error: 'you have borrowed enough books, return some first'})
-
-    }
   
-
-    //check if limit reached
-    //check for fines
-    //check if has book already
-   
-    //
     
 })
+
+// create a fine
+
 //get lib financial status
 //remove a copy
 
