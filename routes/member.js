@@ -10,6 +10,9 @@ member routes
 4. add a review
 5. pay up credits
 6. pay membership fees
+7.view own acc...books borrowed, arrears, due dates
+8.reserve a book
+
 */
 
   router.get('/',(req,res)=>{

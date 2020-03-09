@@ -1,8 +1,8 @@
 const {Schema,model} = require('mongoose')
-const AccountSchema = new Schema({
+const FinanceSchema = new Schema({
     cashBox: Number,
     finesDue: [{type: Schema.Types.ObjectId, ref: 'Fine'}],
     expenses: Number
 },{timestamps: true})
 
-module.exports = model('Account',AccountSchema)
+module.exports = model('Finance',FinanceSchema)

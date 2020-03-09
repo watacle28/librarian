@@ -8,15 +8,15 @@ const reviewSchema = new Schema({
 
 const BookSchema = new Schema({
     name: String,
+    rackId: String,
     genres: [String],
     author: String,
     coverImg: String,
     number0fPages: Number,
-    copies:[{type: Schema.Types.ObjectId, ref: 'BookCopy'}],
+    totalCopies: Number,
     availableCopies: Number,
     loanCount : Number, 
-    owner: {type: Schema.Types.ObjectId,
-            ref: 'User'},
+    reservations: [{type: Schema.Types.ObjectId, ref: 'User'}] ,
     reviews:[reviewSchema]
 },{timestamps: true})
 

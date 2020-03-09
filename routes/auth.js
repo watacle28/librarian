@@ -22,6 +22,7 @@ router.post('/register', async(req,res)=>{
        res.status(400).json({errors})
        return;
     }
+    
 //check if email is in use
     const emailExists = await User.findOne({email})
  
@@ -45,7 +46,7 @@ router.post('/register', async(req,res)=>{
 
     //create token
 
-    const token = jwt.sign({useId: newUser._id, role: newUser.role}, process.env.JWTSecret)
+    const token = jwt.sign({userId: newUser._id, role: newUser.role}, process.env.JWTSecret)
    res.status(200).json({
        user: newUser,
        token

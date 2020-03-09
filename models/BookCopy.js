@@ -1,14 +1,15 @@
 const {model,Schema} = require('mongoose')
 
 const BookCopySchema = new Schema({
-  CopyId: String,
+  Book: {type: Schema.Types.ObjectId, ref: 'Book'},  
+  ISBN: String,
   IssueDate: {type: Date, default: null},
   ReturnDate:  {type: Date, default: null},
   Availability:{
-      type: String,
-      enum: ['loaned','available','reserved','mia'],
-      default: 'available'
+      type: Boolean,
+    
+      default: true
   }
 })
 
-module.exports = model('BookCopy',BookCopySchema,'BookCopies')
+module.exports = model('BookCopy',BookCopySchema,'bookCopies')

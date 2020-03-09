@@ -10,8 +10,9 @@ const UserSchema = new Schema({
         enum: ['Member','Librarian','Partner'],
         default: 'Member'
     },
-    booksOwned: [{type: Schema.Types.ObjectId,ref: 'Book'}],
-    borrowed: [{type: Schema.Types.ObjectId, ref: 'Book'}],
+    isBlocked: {type: Boolean, default: false},
+    borrowed: [{type: Schema.Types.ObjectId, ref: 'BookCopy'}],
+
 
 
 },{timestamps: true})
