@@ -18,8 +18,10 @@ member routes
 7.view own acc...books borrowed, arrears, due dates
 8.reserve a book
 
-*/
-
+*/async function getFines(member){
+   return await Fine.find({member})
+}
+ 
   router.get('/reserve',async(req,res)=>{
       //check if any copies of book are available
       const {_id} = req.body
@@ -29,12 +31,11 @@ member routes
       }
 
       //check for any fines
-      const fines = await Fine.find({member: req.user.userId})
+    const fines = await getFines(req.user.userId)
       if(fines && fines.length > 1){
-        res.redirect('/payFine')
+        res.redirect(200,'payFine')
       }
 
-     
          const userReserves = await Reservation.find({member: req.user.userId})
          if(userReserves > 1)  {
              //check if reserved book already
@@ -45,8 +46,7 @@ member routes
             //check if max reserves is reached
                 if(userReserves == MAX_RESERVATIONS){
                   return res.json({error: 'reserved enough books'})}
-           
-        }
+            }
         
       //create a reservation valid for a day
       const new_reservation = await new Reservation({
@@ -57,22 +57,23 @@ member routes
       //update copies of book reserved on db
       book.availableCopies --;
       book.reservations += 1;
-       await book.save();
-                                     
+       await book.save();                           
 
     return res.json({success: true, new_reservation})
-
-
-
-
-
-
-
-
-
-
   })
 
+  router.post('/payFine',async(req,res)=>{
+    //calculate total payable fine
+    const fines = await getFines(req.user.userId)
+
+
+    //stripe payment here
+
+    //when done
+    
+  })
+
+  
 module.exports = router;
 
 

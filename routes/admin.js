@@ -154,25 +154,42 @@ router.post('/checkout',async(req,res)=>{
    await copy.save();
    
   
-  
-
- 
  return res.json({success: true,user})
  })
 
-// create a fine
+router.post('/checkback',async(req,res)=>{
+  const {ISBN, payNow} = req.body;  
+  const copyReturned = await BookCopy.findOne({ISBN}).populate('Book',['availableCopies'])
+ //check  all fines
+const userFines = await Fine.find({member: req.user.userId})
+if(userFines && payNow == true){res.redirect(301,'./members/payFine')}
 
-router.post('/checkback',(req,res)=>{
+ //add availableCopies
+  copyReturned.Book.availableCopies ++;
+  await copyReturned.Book.save()
 
-    
-    
+ //mark copy available , set ReturnDate and IssueDate to null
+ //save changes to db ie copy,fines, db
+ copyReturned.Availability = true;
+ copyReturned.ReturnDate = null;
+ copyReturned.IssueDate = null;
+ await copyReturned.save()
+
+ return res.json({msg : `${copyReturned} has been returned to library`})
+  
 })
-//get lib financial status
+
 //remove a copy
+router.delete('/deleteCopy',async(req,res)=>{
+   const {ISBN} = req.body
+   const copyToGo = await BookCopy.findOneAndDelete({ISBN})
+  return res.json({msg: `${copyToGo.ISBN} was deleted successfuly `})
+})
+
 
 //edit book
 
-
+//get lib financial status
 exports.adminRoutes = router;
 
   
