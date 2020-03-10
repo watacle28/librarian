@@ -16,7 +16,7 @@ const BookSchema = new Schema({
     totalCopies: Number,
     availableCopies: Number,
     loanCount : Number, 
-    reservations: [{type: Schema.Types.ObjectId, ref: 'User'}] ,
+    reservations: {type: Number, default: 0},
     reviews:[reviewSchema]
 },{timestamps: true})
 

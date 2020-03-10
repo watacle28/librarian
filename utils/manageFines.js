@@ -18,8 +18,7 @@ const borrowedCopies = await BookCopy.find({Availability: false})
                  amount : FINE_PER_DAY,
                  copy: copy._id
              }).save()
-             console.log('hi')
-       
+            res.json({newFine})
      })
  })
 
@@ -30,10 +29,12 @@ const borrowedCopies = await BookCopy.find({Availability: false})
             cron.schedule('0 0 * * *',async()=>{
             fine.amount += FINE_PER_DAY 
             await fine.save()
-            console.log(fine)
+            res.json({fine})
             }
             )
         }))
+       
+
      }
      
 
