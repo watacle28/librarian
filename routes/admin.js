@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const cron = require('node-cron')
 require('dotenv').config()
 
 const uploader = require('../upload')
@@ -12,7 +13,7 @@ const Resevation = require('../models/Reservation')
 const Account = require('../models/Finance')
 const Request = require('../models/Request')
 
-const {MAX_NUMBER_OF_BOOKs,LOAN_DAYS} = require('../utils/constants')
+const {MAX_NUMBER_OF_BOOKs,LOAN_DAYS,FINE_PER_DAY} = require('../utils/constants')
 const {rackId} = require('../utils/rackId')
 
 
@@ -77,8 +78,8 @@ router.post('/copies/:bookId',async(req,res)=>{
     const newCopies = await BookCopy.insertMany(
         copies
     )
-   book.totalCopies =+ copies.length 
-   book.availableCopies =+ copies.length
+   book.totalCopies += copies.length 
+   book.availableCopies += copies.length
     await book.save()
 
     res.status(200).json({success: true,  newCopies})
@@ -101,16 +102,16 @@ router.post('/checkout',async(req,res)=>{
  //check if copy of book is available
    if (book.availableCopies < 1){
        if(reservations.length < 1){ 
-     
- 
-           return res.json({error: 'no copies left ,where the fuck did you get that',books_borrowed})
+          return res.json({error: 'no copies left ,where the fuck did you get that',books_borrowed})
        }else{
-          
-           if(userReserve <= -1){
+ 
+          if(userReserve <= -1){
                return res.json({error: 'book has been reserved'})
            }
        }
+               
    }
+  
    
     // TO-DO:check if has book already
     const has_book_already = books_borrowed.filter(item =>JSON.stringify(item.Book) === JSON.stringify(book._id) )
@@ -128,9 +129,8 @@ router.post('/checkout',async(req,res)=>{
     //check if limit reached
     if(books_borrowed.length >= MAX_NUMBER_OF_BOOKs){
         return res.json({error: 'you have borrowed enough books, return some first'})
-
-    }
-
+  }
+  
     //process checkout
     //update user
    user.borrowed.push(copy)
@@ -152,23 +152,29 @@ router.post('/checkout',async(req,res)=>{
    copy.IssueDate  = IssueDate;
    copy.Availability = false;
    await copy.save();
+   
+  
+  
 
-  
- return res.json({success: true,user})
  
-  
-    
-})
+ return res.json({success: true,user})
+ })
 
 // create a fine
 
+router.post('/checkback',(req,res)=>{
+
+    
+    
+})
 //get lib financial status
 //remove a copy
 
 //edit book
 
 
-module.exports = router;
+exports.adminRoutes = router;
+
   
 
     

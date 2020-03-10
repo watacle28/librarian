@@ -1,5 +1,6 @@
 const express = require('express')
 const mongoose = require('mongoose')
+const manageFines = require('./utils/manageFines')
 
 require('colors')
 const PORT = process.env.PORT | 3002
@@ -10,7 +11,7 @@ const authRoute = require('./routes/auth')
 const userRoute = require('./routes/member')
 const membersRoutes = require('./routes/member')
 const partnerRoutes = require('./routes/partner')
-const adminRoutes = require('./routes/admin')
+const {adminRoutes} = require('./routes/admin')
 
 //import custom middleware
 const members = require('./middleware/auth')
@@ -37,13 +38,14 @@ app.use('/api/members',members, membersRoutes)
 app.use('/api/partners',...partnerCheck,partnerRoutes)
 //routes for librarian
 app.use('/api/admin',...admin,adminRoutes)
-
+//cron.schedule('' ,()=>{console.log('hi')})
 //connect db
 mongoose.connect(process.env.MONGOURI,{useCreateIndex: true,useNewUrlParser: true, useUnifiedTopology: true})
 .then(()=>{
     console.log('db coonnected'.bgMagenta.bold)
 
 })
+manageFines()
 
 //initialize server
 app.listen(PORT,()=>{
