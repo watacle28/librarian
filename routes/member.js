@@ -1,4 +1,6 @@
+require('dotenv').config()
 const {Router} = require('express')
+const stripe = require('stripe')(`${process.env.STRIPE_SECRET_KEY}`)
 const router = Router();
 
 const BookCopy = require('../models/BookCopy')
@@ -6,23 +8,42 @@ const Book = require('../models/Book')
 const Fine = require('../models/Fine')
 const Reservation = require('../models/Reservation')
 const {MAX_RESERVATIONS} = require('../utils/constants')
-  //test 
-  /*
-member routes
-1. borrow books
-2. view all books
-3. edit own profile
-4. add a review
-5. pay up credits
-6. pay membership fees
-7.view own acc...books borrowed, arrears, due dates
-8.reserve a book
 
-*/async function getFines(member){
+async function getFines(member){
    return await Fine.find({member})
 }
+
+
+/*
+3. edit own profile
+4. add a review
+*/
+// add a review
+
+router.post('/review/:bookId',async(req,res)=>{
+  const {body} = req.body
+  const {useId} = req.user
+   
+  const book = await Book.findById({_id: req.params.bookId})
+  book.reviews.push({
+    postedBy: useId,
+    body
+  })
+ await book.save()
+
+ res.json({msg: 'new review added ',book})
+
+})
+
+  
+// view all books
+router.get('/', async(req,res)=>{
+    const books = await Book.find();
+    res.json({books})
+})
  
-  router.get('/reserve',async(req,res)=>{
+//reserve a book
+  router.post('/reserve',async(req,res)=>{
       //check if any copies of book are available
       const {_id} = req.body
       const book = await Book.findById({_id});
@@ -62,14 +83,25 @@ member routes
     return res.json({success: true, new_reservation})
   })
 
+//pay fines
   router.post('/payFine',async(req,res)=>{
     //calculate total payable fine
     const fines = await getFines(req.user.userId)
 
+   try {
 
-    //stripe payment here
+    const totalfines = fines.reduce((acc, fine)=> acc + fine)
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: totalfines ,
+      currency: 'zar',
+      
+    });
+      res.json({clientSecret: paymentIntent.client_secret})
 
-    //when done
+   } catch (error) {
+     res.json({error})
+   }
+   
     
   })
 

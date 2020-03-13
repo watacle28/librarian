@@ -1,10 +1,12 @@
+require('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
+
 const manageFines = require('./utils/manageFines')
 
 require('colors')
 const PORT = process.env.PORT | 3002
-require('dotenv').config()
+
 
 //import routes
 const authRoute = require('./routes/auth')
@@ -30,7 +32,8 @@ app.use('/api/user', userRoute)
 //combine level check middleware
 const partnerCheck = [members,partnerLevel]
 const admin = [members,partnerLevel,adminLevel]
-
+//const totalfines = fines.reduce((acc, fine)=> acc + fine)
+ 
 /*ROUTES MIDDLEWARE*/
 //routes for members
 app.use('/api/members',members, membersRoutes)
@@ -45,7 +48,6 @@ mongoose.connect(process.env.MONGOURI,{useCreateIndex: true,useNewUrlParser: tru
     console.log('db coonnected'.bgMagenta.bold)
 
 })
-manageFines()
 
 //initialize server
 app.listen(PORT,()=>{

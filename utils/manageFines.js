@@ -13,7 +13,7 @@ const borrowedCopies = await BookCopy.find({Availability: false})
       let date = copy.ReturnDate.getDate() + 1
      let month = copy.ReturnDate.getMonth() + 1
     
-     cron.schedule(`0 ${date} ${month} * *`, async()=>{
+     cron.schedule(`0 0 ${date} ${month} *`, async()=>{
         const newFine = await new Fine({
                  amount : FINE_PER_DAY,
                  copy: copy._id
