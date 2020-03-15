@@ -5,6 +5,7 @@ const router = Router();
 
 const BookCopy = require('../models/BookCopy')
 const Book = require('../models/Book')
+const User = require('../models/User')
 const Fine = require('../models/Fine')
 const Reservation = require('../models/Reservation')
 const {MAX_RESERVATIONS} = require('../utils/constants')
@@ -14,10 +15,18 @@ async function getFines(member){
 }
 
 
-/*
-3. edit own profile
-4. add a review
-*/
+
+// edit own profile
+router.put('/profile',async(req,res)=>{
+  const {email,name} = req.body
+ try {
+  const profile = await User.findByIdAndUpdate({_id:req.user.useId},{email,name},{new: true})
+  return res.json({msg:'successfuly edited profile',profile})
+ } catch (error) {
+   return res.json({error})
+ }
+})
+
 // add a review
 
 router.post('/review/:bookId',async(req,res)=>{
@@ -25,6 +34,13 @@ router.post('/review/:bookId',async(req,res)=>{
   const {useId} = req.user
    
   const book = await Book.findById({_id: req.params.bookId})
+  //check if no review added already
+  const has_reviewed = book.reviews.filter(review => JSON.stringify(review.postedBy) === JSON.stringify(useId))
+  if(has_reviewed.length >= 1){
+   return res.json({error: 'has reviewed'})
+   
+  }
+
   book.reviews.push({
     postedBy: useId,
     body
@@ -43,9 +59,9 @@ router.get('/', async(req,res)=>{
 })
  
 //reserve a book
-  router.post('/reserve',async(req,res)=>{
+  router.post('/reserve/:_id',async(req,res)=>{
       //check if any copies of book are available
-      const {_id} = req.body
+      const {_id} = req.params
       const book = await Book.findById({_id});
       if(book.availableCopies < 1){
         return res.json({error: 'no copies available  , please try again some time'})

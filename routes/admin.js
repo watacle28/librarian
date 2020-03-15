@@ -9,9 +9,9 @@ const Book = require('../models/Book')
 const Fine = require('../models/Fine')
 const BookCopy = require('../models/BookCopy')
 const User = require('../models/User')
-const Resevation = require('../models/Reservation')
+
 const Account = require('../models/Finance')
-const Request = require('../models/Request')
+
 
 const {MAX_NUMBER_OF_BOOKs,LOAN_DAYS,FINE_PER_DAY} = require('../utils/constants')
 const {rackId} = require('../utils/rackId')
@@ -64,13 +64,13 @@ router.post('/addBook',uploader.single('image'),async(req,res)=>{
 
 //add a copy
 router.post('/copies/:bookId',async(req,res)=>{
-    const {ISBNs} = req.body;
+    const {copyIds} = req.body;
     const book = await Book.findById({_id: req.params.bookId})
      
     let copies = [];
-    ISBNs.forEach(copy => {
+    copyIds.forEach(copy => {
         copies.push({
-            ISBN: copy.ISBN,
+            copyId: copy.copyId,
             Book: book._id
         })
     });
@@ -90,10 +90,10 @@ router.post('/copies/:bookId',async(req,res)=>{
 router.post('/checkout',async(req,res)=>{
   
   //get user and book in question
-   const {ISBN, email} = req.body;
+   const {copyId, email} = req.body;
    
    const user = await User.findOne({email}).populate('borrowed',['Book'])
-   const copy = await BookCopy.findOne({ISBN})
+   const copy = await BookCopy.findOne({copyId})
    const book = await Book.findById({_id: copy.Book})
    const reservations = book.reservations;
    const userReserve = reservations.indexOf(user._id)
@@ -113,7 +113,7 @@ router.post('/checkout',async(req,res)=>{
    }
   
    
-    // TO-DO:check if has book already
+    // check if has book already
     const has_book_already = books_borrowed.filter(item =>JSON.stringify(item.Book) === JSON.stringify(book._id) )
    
     if(has_book_already.length >= 1){
@@ -158,8 +158,8 @@ router.post('/checkout',async(req,res)=>{
  })
 
 router.post('/checkback',async(req,res)=>{
-  const {ISBN, payNow} = req.body;  
-  const copyReturned = await BookCopy.findOne({ISBN}).populate('Book',['availableCopies'])
+  const {copyId, payNow} = req.body;  
+  const copyReturned = await BookCopy.findOne({copyId}).populate('Book',['availableCopies'])
  //check  all fines
 const userFines = await Fine.find({member: req.user.userId})
 if(userFines && payNow == true){res.redirect(301,'./members/payFine')}
@@ -181,14 +181,21 @@ if(userFines && payNow == true){res.redirect(301,'./members/payFine')}
 
 //remove a copy
 router.delete('/deleteCopy',async(req,res)=>{
-   const {ISBN} = req.body
-   const copyToGo = await BookCopy.findOneAndDelete({ISBN})
-  return res.json({msg: `${copyToGo.ISBN} was deleted successfuly `})
+   const {copyId} = req.body
+   const copyToGo = await BookCopy.findOneAndDelete({copyId})
+  return res.json({msg: `${copyToGo.copyId} was deleted successfuly `})
 })
 
 
 //edit book
-
+router.put('/edit/:bookId', async(req,res)=>{
+    try {
+      const book = await Book.findByIdAndUpdate({_id: req.params.bookId},{body},{new: true})
+      res.json({book})
+    } catch (error) {
+      res.json({error})
+    }
+  })
 //get lib financial status
 exports.adminRoutes = router;
 

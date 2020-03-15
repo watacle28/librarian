@@ -45,7 +45,7 @@ app.use('/api/admin',...admin,adminRoutes)
 //connect db
 mongoose.connect(process.env.MONGOURI,{useCreateIndex: true,useNewUrlParser: true, useUnifiedTopology: true})
 .then(()=>{
-    console.log('db coonnected'.bgMagenta.bold)
+    console.log('database connected successfully @sirwatacle'.bgMagenta.bold)
 
 })
 

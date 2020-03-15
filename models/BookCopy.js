@@ -2,7 +2,7 @@ const {model,Schema} = require('mongoose')
 
 const BookCopySchema = new Schema({
   Book: {type: Schema.Types.ObjectId, ref: 'Book'},  
-  ISBN: String,
+  copyId: String,
   IssueDate: {type: Date, default: null},
   ReturnDate:  {type: Date, default: null},
   Availability:{

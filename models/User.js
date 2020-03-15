@@ -7,7 +7,7 @@ const UserSchema = new Schema({
     profilePic: String,
     role: {
         type: String,
-        enum: ['Member','Librarian','Partner'],
+        enum: ['Member','Admin'],
         default: 'Member'
     },
     isBlocked: {type: Boolean, default: false},
