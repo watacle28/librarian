@@ -20,7 +20,6 @@
     "multer-storage-cloudinary": "^2.2.1",
     "node-cron": "^2.0.3",
     "nodemailer": "^6.4.5",
-    "promisify": "0.0.3",
     "stripe": "^8.30.0"
   },
   "devDependencies": {
