@@ -5,6 +5,8 @@ const UserSchema = new Schema({
     email: String,
     password: String,
     profilePic: String,
+    resetToken: String,
+    tokenExpiration: Date,
     role: {
         type: String,
         enum: ['Member','Admin'],

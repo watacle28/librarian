@@ -1,9 +1,7 @@
 require('dotenv').config()
 const nodemailer = require('nodemailer')
-const promisify = require('promisify')
-const crypto = require('crypto')
 
-const mailer = async(body) =>{
+const mailer = (body) =>{
 
     let transporter = nodemailer.createTransport({
         host: "smtp.mailtrap.io",
@@ -14,9 +12,6 @@ const mailer = async(body) =>{
         }
       });
 
-
-
-
       let mailInfo = {
         from: process.env.SENDER, // sender address
         to: body.to, // list of receivers
@@ -24,7 +19,7 @@ const mailer = async(body) =>{
         text: body.text, // plain text body
         html: `<p>${body.text}</p>` // html body
       }
-   return await transporter.sendMail(mailInfo)
+   return transporter.sendMail(mailInfo)
       
 }
 

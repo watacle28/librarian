@@ -2,6 +2,9 @@ const {Router} = require('express')
 const router = Router();
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const crypto = require('crypto')
+
+const sendmail = require('../utils/mailer')
 
 require('dotenv').config();
 const User = require('../models/User');
@@ -85,6 +88,75 @@ router.post('/login',async(req,res)=>{
 
    res.status(200).json({user,token})
 })
+
+//forgot password
+router.post('/forgot',async(req,res)=>{
+    //check if user exists
+    const {email} = req.body
+    const user = await User.findOne({email})
+    if (!user){
+        return res.json({error:`user with ${email} not found`}) 
+    }
+
+    //create a token , expiration date
+    const resetToken = crypto.randomBytes(20).toString('hex')
+    const tokenExpiration = Date.now() + 360000 //expires in an hour
+
+    //update user
+    user.resetToken = resetToken;
+    user.tokenExpiration = tokenExpiration;
+    await user.save();
+    
+    //send email with token
+    try {
+        const to = user.email
+        const subject = 'Reset Password'
+        const link = `http://${req.headers.host}/api/auth/reset/${user.resetToken}`
+        const text = `Hello , please follow ${link} to reset your password, link is valid for an hour`
+        const html = `<p>${text}</p>`
+
+        await sendmail({to,subject,text,html})
+        res.redirect('reset')
+        
+    } catch (error) {
+        res.json({errro: error.message})
+    }
+
+
+})
+
+router.post('/reset:token',async(req,res)=>{
+  const resetToken = req.params.token
+ //check if token is valid
+ const user = await User.findOne({resetToken,tokenExpiration:{$gt: Date.now()}})
+ if(!user){
+     return res.json({error: 'token is not valid/expired'})
+ }
+
+ //check if passwords are the same
+ if (req.body.password === '') {
+     return res.json({error: 'password is required'})
+ }
+ if(req.body.password !== req.body.confirmPassword){
+     return res.json({error: 'passwords do not match'})
+ }
+ //hash password with bcrypt
+ const hashed = await bcrypt.hash(req.body.password, 10)
+  
+ //update user details
+ try {
+    user.resetToken = null;
+    user.tokenExpiration = null;
+    user.password = hashed;
+    const updatedUser = await user.save()
+   
+    res.json({updatedUser})
+
+ } catch (error) {
+     res.json({error: error.message})
+ }
+})
+
 
 
 module.exports = router;
