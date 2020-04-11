@@ -1,11 +1,12 @@
 require('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
+const cors = require('cors')
 
 const manageFines = require('./utils/manageFines')
 
 require('colors')
-const PORT = process.env.PORT | 3002
+const PORT = process.env.PORT | 5009
 
 
 //import routes
@@ -21,7 +22,7 @@ const partnerLevel = require('./middleware/partners')
 const adminLevel = require('./middleware/admin')
 
 const app = express()
-
+app.use(cors())
 //add middleware
 app.use(express.json())
 
@@ -35,6 +36,8 @@ const admin = [members,partnerLevel,adminLevel]
 //const totalfines = fines.reduce((acc, fine)=> acc + fine)
  
 /*ROUTES MIDDLEWARE*/
+//public route
+app.use('/api/public', require('./routes/public'))
 //routes for members
 app.use('/api/members',members, membersRoutes)
 //routes for partners and librarian only
@@ -46,10 +49,9 @@ app.use('/api/admin',...admin,adminRoutes)
 mongoose.connect(process.env.MONGOURI,{useCreateIndex: true,useNewUrlParser: true, useUnifiedTopology: true})
 .then(()=>{
     console.log('database connected successfully @sirwatacle'.bgMagenta.bold)
-
+   app.listen(PORT,()=>{
+    console.log(`server running at http://localhost:${PORT}`.bgCyan.bold)
+})
 })
 
 //initialize server
-app.listen(PORT,()=>{
-    console.log(`server running at http://localhost:${PORT}`.bgCyan.bold)
-})

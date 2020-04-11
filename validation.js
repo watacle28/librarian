@@ -5,17 +5,17 @@ module.exports.validateRegister = ({name,email,password,confirmPassword})=>{
         errors.name = 'field can not be empty'
        // throw new Error({errors})
     }
-
+  
     if(email.trim() ==''){
         errors.email = 'please provide an email'
         // throw new Error({errors})
     }else if(!email.match(isemail)){
         errors.email = 'email address is not valid'
     }
-    if(password == ''){
-      errors.password = 'please enter password'
-    //   throw new Error({errors})
-    }
+    if(password.trim() == ""){
+        errors.password = 'please enter password'
+        //   throw new Error({errors})
+        }
     if(password != confirmPassword){
         errors.confirmPassword = 'passwords do not match'
         // throw new Error({errors})

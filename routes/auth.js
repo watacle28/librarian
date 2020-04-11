@@ -22,8 +22,9 @@ router.post('/register', async(req,res)=>{
     
 //validate user input
     if(!isValid){
-       res.status(400).json({errors})
-       return;
+        (errors);
+       return res.status(400).json({errors})
+       
     }
     
 //check if email is in use
@@ -32,8 +33,8 @@ router.post('/register', async(req,res)=>{
    if(emailExists) {
       
        errors.email = 'email is taken'
-       res.status(400).json({errors})
-       return;
+      return res.status(400).json({errors})
+      
    }
     //hash password
     const hashedPassword =  await bcrypt.hash(password,12);
@@ -58,35 +59,37 @@ router.post('/register', async(req,res)=>{
     
 })
 
+
 router.post('/login',async(req,res)=>{
     const {isValid,errors} = validateLogin(req.body)
     const{email,password} = req.body;
-//validate input
+    //validate input
     if(!isValid){
-        res.status(400).json({errors})
-        return;
+    
+     return res.status(400).json({status: 400,errors})
+       
     }
     //check email 
     const user = await User.findOne({email})
     if(!user){
         errors.email = 'email not linked to any account'
-        res.status(400).json({errors})
-        return;
+       return res.status(400).json({errors})
+         
+        
     }
     //validate password
     const valid = await bcrypt.compare(password,user.password)
 
     if(!valid){
         errors.password = 'passwword entered is wrong'
-        res.status(401).json({errors})
-        return;
+       return res.status(401).json({errors})
     }
 
    //create token
 
    const token = jwt.sign({userId: user._id, role: user.role},process.env.JWTSecret)
 
-   res.status(200).json({user,token})
+   res.status(200).json({token})
 })
 
 //forgot password
@@ -130,7 +133,7 @@ router.post('/reset:token',async(req,res)=>{
  //check if token is valid
  const user = await User.findOne({resetToken,tokenExpiration:{$gt: Date.now()}})
  if(!user){
-     return res.json({error: 'token is not valid/expired'})
+     return res.status(401).json({error: 'token is not valid/expired'})
  }
 
  //check if passwords are the same

@@ -13,7 +13,18 @@ const {MAX_RESERVATIONS} = require('../utils/constants')
 async function getFines(member){
    return await Fine.find({member})
 }
+router.get('/user',async(req,res)=>{
+  const _id = req.user.userId;
+  try {
+    const user = await User.findById(_id).select('-password');
+  
+    return res.json({user})
+  } catch (error) {
+   return res.json({error: error.message})
+  }
 
+
+})
 
 
 // edit own profile
@@ -51,20 +62,27 @@ router.post('/review/:bookId',async(req,res)=>{
 
 })
 
-  
-// view all books
-router.get('/', async(req,res)=>{
-    const books = await Book.find();
-    res.json({books})
-})
+  //get all user reservations
+  router.get('/reserves',async(req,res)=>{
+    try {
+      const res = await Reservation.find({member: req.user.userId})
+      return res.json({userReserves: res.data}) 
+    } catch (error) {
+      res.status(404).json({error: error.message})
+      
+    }
+  })
+
  
 //reserve a book
   router.post('/reserve/:_id',async(req,res)=>{
+    
       //check if any copies of book are available
       const {_id} = req.params
-      const book = await Book.findById({_id});
+      const book = await Book.findById({_id})
+      console.log(book.availableCopies);
       if(book.availableCopies < 1){
-        return res.json({error: 'no copies available  , please try again some time'})
+        return res.status(400).json({error: 'no copies available  , please try again some time'})
       }
 
       //check for any fines
@@ -74,15 +92,21 @@ router.get('/', async(req,res)=>{
       }
 
          const userReserves = await Reservation.find({member: req.user.userId})
-         if(userReserves > 1)  {
-             //check if reserved book already
-             const reserved_book_already = userReserves.filter(item =>JSON.stringify(item.book) === JSON.stringify(book._id) )
-                if(reserved_book_already){
-                  return res.json({error: 'you have the book already in your cart'})
+         
+         if(userReserves.length >= 1)  {
+           //check if max reserves is reached
+                if(userReserves.length == MAX_RESERVATIONS){
+                  console.log('max');
+                  return res.status(400).json({error: 'reserved enough books'})
                 }
-            //check if max reserves is reached
-                if(userReserves == MAX_RESERVATIONS){
-                  return res.json({error: 'reserved enough books'})}
+             //check if reserved book already
+                console.log('>1');
+                const reserved_book_already = userReserves.filter(item =>JSON.stringify(item.book) === JSON.stringify(book._id) )
+                if(reserved_book_already.length>1){
+                  console.log('alredady have');
+                  return res.status(400).json({error: 'you have the book already in your cart'})
+                }
+            
             }
         
       //create a reservation valid for a day
@@ -94,9 +118,12 @@ router.get('/', async(req,res)=>{
       //update copies of book reserved on db
       book.availableCopies --;
       book.reservations += 1;
+      const user = await User.findById(req.user.userId)
+      user.reservations += 1;
+      await user.save()
        await book.save();                           
 
-    return res.json({success: true, new_reservation})
+    return res.status(200).json({success: true, new_reservation,user})
   })
 
 //pay fines

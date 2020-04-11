@@ -14,6 +14,8 @@ const UserSchema = new Schema({
     },
     isBlocked: {type: Boolean, default: false},
     borrowed: [{type: Schema.Types.ObjectId, ref: 'BookCopy'}],
+    reservations: {type:Number, default:0},
+    fines: [{type: Schema.Types.ObjectId, ref: 'Fine'}]
 
 
 
