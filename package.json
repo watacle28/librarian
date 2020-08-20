@@ -10,7 +10,7 @@
   "author": "watacle",
   "license": "MIT",
   "dependencies": {
-    "bcrypt": "^4.0.0",
+    "bcrypt": "^5.0.0",
     "cloudinary": "^1.19.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
